@@ -16,6 +16,8 @@ Final project for the **Neural Networks** course, Shenkar College of Engineering
 
 ## Results
 
+![Validation predictions on all 9 scans — red = prediction, green = ground truth](figures/results_gallery.png)
+
 | Configuration | Val Dice |
 |---|---|
 | Baseline | 0.944 |
@@ -28,6 +30,8 @@ Final project for the **Neural Networks** course, Shenkar College of Engineering
 - **Stability:** 3-seed mean 0.9477 ± 0.0028; paired Wilcoxon vs the augmented recipe confirms the no-aug choice is the stable one.
 
 ## Explainability
+
+![Attention-on-spleen ratio and occlusion faithfulness test](figures/explainability_evidence.png)
 
 Hooked the deepest Swin self-attention to see where the model attends:
 - Attention concentrates on the spleen (attention-on-spleen ratio **1.47–2.33** across validation cases).
