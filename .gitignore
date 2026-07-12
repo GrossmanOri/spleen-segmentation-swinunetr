@@ -1,0 +1,16 @@
+# Dataset — do not commit or redistribute; download from the official source (see docs/DATA.md)
+data/
+Task09_Spleen/
+*.nii
+*.nii.gz
+
+# Model weights / checkpoints (large)
+*.pth
+*.pt
+*.ckpt
+
+# System / notebook cruft
+.DS_Store
+.ipynb_checkpoints/
+__pycache__/
+*.zip
