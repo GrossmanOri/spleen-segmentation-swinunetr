@@ -48,6 +48,8 @@ PyTorch · MONAI 1.4.0 · Swin UNETR · trained on an NVIDIA L4 GPU.
 |---|---|
 | `Spleen_Segmentation_SwinUNETR.ipynb` | The full, self-contained notebook — code, outputs and figures. |
 | `demo_inference.ipynb` | Short inference-only demo: loads the trained checkpoint, segments a validation volume, and reproduces the attention analysis in a few seconds. |
+| `scripts/train.py` | The training script used for all four runs — CLI-configurable schedule, augmentation and epoch budget. |
+| `scripts/submit.sh` | Slurm batch job that runs the trainer inside the lab's Apptainer PyTorch container. |
 | `docs/Report.pdf` | Written technical report. |
 | `docs/Presentation.pdf` | Project presentation slides. |
 | `figures/` | Result figures (learning curves, ablation, attention maps, prediction gallery). |
