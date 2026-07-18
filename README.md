@@ -18,16 +18,21 @@ Final project for the **Neural Networks** course, Shenkar College of Engineering
 
 ![Validation predictions on all 9 scans — red = prediction, green = ground truth](figures/results_gallery.png)
 
-| Configuration | Val Dice |
-|---|---|
-| Baseline | 0.944 |
-| + augmentation | 0.909 |
-| + augmentation + Dice floor | 0.911 |
-| **No augmentation (best)** | **0.9465** |
+| Run | Schedule | Augmentation | Epochs | Val Dice |
+|---|---|---|---|---|
+| baseline | fixed LR 1e-4 | none | 60 | 0.9437 |
+| exp1 | cosine + 15 ep warm-up | **on** | 80 | 0.9088 |
+| exp2 | cosine + 10 ep warm-up + LR floor | **on** | 100 | 0.9108 |
+| **exp3 (chosen)** | cosine + 10 ep warm-up + LR floor | none | 70 | **0.9465** |
 
-- **Epoch-matched control:** the augmented recipe at the same 70 epochs reached 0.8927 vs 0.9465 → augmentation *hurt* on this small (32-volume) CT set, even at a matched compute budget.
+Note the baseline is *also* un-augmented, so baseline → exp3 isolates the **LR schedule**, not augmentation. The clean augmentation contrast is **exp2 vs exp3** (identical schedule, augmentation the only difference).
+
+- **Epoch-matched control:** the augmented recipe re-run at exactly 70 epochs reached 0.8927 vs exp3's 0.9465 — a ~5.4-point single-variable gap. That run peaked at epoch 40 and then plateaued, so it was converged, not undertrained.
 - **Boundary quality (best model):** HD95 3.95 mm · Surface-Dice 0.889 @2 mm · precision 0.944 · recall 0.950.
-- **Stability:** 3-seed mean 0.9477 ± 0.0028; paired Wilcoxon vs the augmented recipe confirms the no-aug choice is the stable one.
+- **Convergence:** exp3 dips once, to 0.7573 at epoch 40, recovers by epoch 45, then holds a 0.013-wide band (0.9331–0.9465) over its last 25 epochs — against a 0.231-wide swing for the baseline over its last 30. Roughly 17× tighter, which is why exp3 was chosen.
+- **Stability:** 3-seed mean 0.9477 ± 0.0028. A paired Wilcoxon of **exp3 vs the baseline** gives **p = 0.20 — not significant**: exp3 is chosen for how tightly it converges, *not* for a demonstrated accuracy advantage over the baseline.
+
+> **Limitation.** Results are on **9 validation volumes with no held-out test set**, and every hyper-parameter (schedule, warm-up, LR floor, augmentation on/off) was selected on those same 9 volumes. All numbers here are therefore optimistic to an unknown degree.
 
 ## Explainability
 
@@ -47,7 +52,7 @@ PyTorch · MONAI 1.4.0 · Swin UNETR · trained on an NVIDIA L4 GPU.
 | Path | What it is |
 |---|---|
 | `Spleen_Segmentation_SwinUNETR.ipynb` | The full, self-contained notebook — code, outputs and figures. |
-| `demo_inference.ipynb` | Short inference-only demo: loads the trained checkpoint, segments a validation volume, and reproduces the attention analysis in a few seconds. |
+| `demo_inference.ipynb` | Short inference-only demo (reference code): segments a validation volume and reproduces the attention analysis. Requires the trained exp3 checkpoint from the Shenkar lab GPU — checkpoints are gitignored and not distributed, so it is not runnable as-is. |
 | `scripts/train.py` | The training script used for all four runs — CLI-configurable schedule, augmentation and epoch budget. |
 | `scripts/submit.sh` | Slurm batch job that runs the trainer inside the lab's Apptainer PyTorch container. |
 | `docs/Report.pdf` | Written technical report. |
@@ -60,7 +65,25 @@ The dataset is **not** included in this repo. See [`docs/DATA.md`](docs/DATA.md)
 
 ## Reproducing
 
-The notebook was run on a university GPU lab and is committed **with all outputs saved**, so it reads end-to-end without re-running. To re-run, download the dataset (see `docs/DATA.md`) and use a CUDA GPU with MONAI + PyTorch.
+The notebook was run on a university GPU lab and is committed **with all outputs saved**, so it reads end-to-end without re-running. To re-run, download the dataset (see `docs/DATA.md`) and use a CUDA GPU with **MONAI 1.4.0** + PyTorch (`pip install -r requirements.txt`).
+
+`scripts/train.py` is CLI-configurable and reproduces all four runs:
+
+```bash
+# baseline — fixed LR, no augmentation, 60 epochs
+python scripts/train.py --exp_name baseline --scheduler none --epochs 60 --lr 1e-4
+
+# exp1 — cosine + 15-epoch warm-up + augmentation, 80 epochs
+python scripts/train.py --exp_name exp1_cosine_aug --scheduler cosine --warmup 15 --augment --epochs 80
+
+# exp2 — cosine + 10-epoch warm-up + LR floor + augmentation, 100 epochs
+python scripts/train.py --exp_name exp2_cosine_aug_floor --scheduler cosine --warmup 10 --augment --epochs 100
+
+# exp3 (chosen) — same schedule, augmentation OFF, 70 epochs
+python scripts/train.py --exp_name exp3_cosine_noaug --scheduler cosine --warmup 10 --epochs 70
+```
+
+Other flags: `--data_dir`, `--out_root`, `--weight_decay`, `--feature_size`, `--num_samples`, `--batch_size`, `--val_interval`, `--seed`. `scripts/submit.sh` wraps the same script as a Slurm job.
 
 ## Selected figures
 

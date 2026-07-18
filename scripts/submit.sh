@@ -7,4 +7,4 @@
 
 CONTAINER=/opt/containers/pytorch-25.04.sif
 cd /home/ori.grossman/nn_final
-apptainer exec --nv "$CONTAINER" python notebooks/train.py "$@"
+apptainer exec --nv "$CONTAINER" python scripts/train.py "$@"

@@ -1,0 +1,10 @@
+# Minimal environment for scripts/train.py and the notebooks.
+# Only MONAI is pinned — it is the one version this project was actually run against
+# (the lab's Apptainer PyTorch container supplied torch/CUDA, so torch is left unpinned).
+
+monai==1.4.0
+torch
+numpy
+matplotlib
+nibabel      # NIfTI reader used by MONAI's LoadImaged for the MSD .nii.gz volumes
+scipy        # required by MONAI's HD95 / Surface-Dice metrics
